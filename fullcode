@@ -1,0 +1,154 @@
+# If you see 'ModuleNotFoundError: No module named "PyQt5"'
+# run: pip install PyQt5
+
+import sys
+import cv2
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QPushButton, QLabel, QVBoxLayout,
+    QHBoxLayout, QStackedWidget, QMainWindow, QSpacerItem, QSizePolicy
+)
+from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
+from PyQt5.QtCore import Qt, QTimer
+
+class LiveViewPage(QWidget):
+    def __init__(self, return_home_callback):
+        super().__init__()
+        self.return_home_callback = return_home_callback
+        self.initUI()
+
+    def initUI(self):
+        self.setStyleSheet("background-color: white;")
+
+        self.title = QLabel("Say Hi!")
+        self.title.setAlignment(Qt.AlignCenter)
+        self.title.setFont(QFont('Arial', 36))
+
+        self.video_label = QLabel()
+        self.video_label.setAlignment(Qt.AlignCenter)
+        self.video_label.setText("Loading camera...")
+        self.video_label.setFont(QFont('Arial', 24))
+
+        self.back_btn = QPushButton("Return to Home")
+        self.back_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
+        self.back_btn.setFont(QFont('Arial', 18))
+        self.back_btn.clicked.connect(self.return_home_callback)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.title)
+        layout.addWidget(self.video_label)
+        layout.addWidget(self.back_btn, alignment=Qt.AlignCenter)
+        layout.setSpacing(30)
+        layout.setContentsMargins(40, 40, 40, 40)
+
+        self.setLayout(layout)
+
+        self.cap = cv2.VideoCapture(0)
+        if not self.cap.isOpened():
+            self.video_label.setText("No camera detected.")
+        else:
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.update_frame)
+            self.timer.start(30)
+
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(image))
+        else:
+            self.video_label.setText("Camera error.")
+
+    def closeEvent(self, event):
+        if self.cap and self.cap.isOpened():
+            self.cap.release()
+        if hasattr(self, 'timer'):
+            self.timer.stop()
+        event.accept()
+
+class MainMenu(QWidget):
+    def __init__(self, go_live_view_callback):
+        super().__init__()
+        self.go_live_view_callback = go_live_view_callback
+        self.initUI()
+
+    def initUI(self):
+        self.setStyleSheet("background-color: white;")
+
+        self.title = QLabel("Welcome to StayFocused")
+        self.title.setAlignment(Qt.AlignCenter)
+        self.title.setFont(QFont('Arial', 48))
+
+        self.calibrate_btn = QPushButton("Calibrate")
+        self.start_btn = QPushButton("Start Session")
+        self.live_view_btn = QPushButton("Live View")
+        self.settings_icon = QPushButton()
+
+        for btn in [self.calibrate_btn, self.start_btn]:
+            btn.setStyleSheet(
+                "background-color: black; color: white; padding: 30px 60px; border-radius: 16px;"
+            )
+            btn.setFont(QFont('Arial', 28))
+            btn.setMinimumWidth(500)
+            btn.setMinimumHeight(80)
+            btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.live_view_btn.setStyleSheet(
+            "background-color: black; color: white; padding: 12px 24px; border-radius: 10px;"
+        )
+        self.live_view_btn.setFont(QFont('Arial', 16))
+        self.live_view_btn.setFixedWidth(140)
+        self.live_view_btn.clicked.connect(self.go_live_view_callback)
+
+        self.settings_icon.setIcon(QIcon.fromTheme("preferences-system"))
+        self.settings_icon.setFixedSize(40, 40)
+        self.settings_icon.setStyleSheet("border: none;")
+
+        self.vbox_center = QVBoxLayout()
+        self.vbox_center.setSpacing(60)
+        self.vbox_center.addWidget(self.title)
+        self.vbox_center.addWidget(self.calibrate_btn, alignment=Qt.AlignCenter)
+        self.vbox_center.addWidget(self.start_btn, alignment=Qt.AlignCenter)
+        self.vbox_center.addWidget(self.settings_icon, alignment=Qt.AlignCenter)
+        self.vbox_center.setAlignment(Qt.AlignCenter)
+
+        self.hbox_bottom = QHBoxLayout()
+        self.hbox_bottom.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.hbox_bottom.addWidget(self.live_view_btn)
+        self.hbox_bottom.setContentsMargins(0, 0, 40, 40)
+
+        self.outer_layout = QVBoxLayout()
+        self.outer_layout.addStretch()
+        self.outer_layout.addLayout(self.vbox_center)
+        self.outer_layout.addStretch()
+        self.outer_layout.addLayout(self.hbox_bottom)
+
+        self.setLayout(self.outer_layout)
+
+class MainApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("StayFocused")
+        self.setStyleSheet("background-color: white;")
+        self.setMinimumSize(1024, 768)
+        self.showMaximized()
+        self.central_widget = QStackedWidget()
+        self.setCentralWidget(self.central_widget)
+
+        self.main_menu = MainMenu(self.go_to_live_view)
+        self.live_view_page = LiveViewPage(self.return_to_home)
+
+        self.central_widget.addWidget(self.main_menu)
+        self.central_widget.addWidget(self.live_view_page)
+
+    def go_to_live_view(self):
+        self.central_widget.setCurrentWidget(self.live_view_page)
+
+    def return_to_home(self):
+        self.central_widget.setCurrentWidget(self.main_menu)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainApp()
+    window.show()
+    sys.exit(app.exec_())
