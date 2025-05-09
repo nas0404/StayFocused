@@ -256,6 +256,7 @@ class LiveViewPage(QWidget):
     def __init__(self, return_home_callback):
         super().__init__()
         self.return_home_callback = return_home_callback
+        self.cap = None  # Initialize cap as None
         self.initUI()
 
     def initUI(self):
@@ -276,7 +277,8 @@ class LiveViewPage(QWidget):
         layout.setContentsMargins(40, 40, 40, 40)
         self.setLayout(layout)
 
-        self.cap = cv2.VideoCapture(0)
+    def start_camera(self):
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         if not self.cap.isOpened():
             self.video_label.setText("No camera detected.")
         else:
@@ -301,13 +303,48 @@ class LiveViewPage(QWidget):
         event.accept()
 
 
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(image))
+        else:
+            self.video_label.setText("Camera error.")
+
+    def closeEvent(self, event):
+        if self.cap and self.cap.isOpened():
+            self.cap.release()
+        if hasattr(self, 'timer'):
+            self.timer.stop()
+        event.accept()
+
+        
+
+        
+# class MLPage(LiveViewPage):
+#     def __init__(self, go_to_summary_callback, return_home_callback):
+#         self.go_to_summary_callback = go_to_summary_callback
+#         super().__init__(return_home_callback)  # Initializes camera and sets up layout
+#         self.initUI()
+
+#     def initUI(self):
+#         super().initUI()  # Ensure LiveViewPage UI (including self.title) is set up
+
+#         self.title.setText("You're now free to work")
+
+#         self.end_session_btn = QPushButton("End Session")
+#         self.end_session_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
+#         self.end_session_btn.setFont(QFont('Arial', 18))
+#         self.end_session_btn.clicked.connect(self.go_to_summary_callback)
+
+#         self.layout().addWidget(self.end_session_btn, alignment=Qt.AlignCenter)
+
 class MLPage(LiveViewPage):
     def __init__(self, go_to_summary_callback, return_home_callback):
         self.go_to_summary_callback = go_to_summary_callback
-        super().__init__(return_home_callback)
+        super().__init__(return_home_callback)  # Initializes layout
 
-    def initUI(self):
-        super().initUI()
         self.title.setText("You're now free to work")
 
         self.end_session_btn = QPushButton("End Session")
@@ -316,6 +353,7 @@ class MLPage(LiveViewPage):
         self.end_session_btn.clicked.connect(self.go_to_summary_callback)
 
         self.layout().addWidget(self.end_session_btn, alignment=Qt.AlignCenter)
+
 
 
 class FocusTimerPage(QWidget):
@@ -421,6 +459,7 @@ class MainApp(QMainWindow):
         self.central_widget.addWidget(self.summary_page)
 
     def go_to_live_view(self):
+        self.live_view_page.start_camera()  # <-- THIS starts the camera
         self.central_widget.setCurrentWidget(self.live_view_page)
 
     def go_to_session(self):
@@ -435,6 +474,7 @@ class MainApp(QMainWindow):
         self.central_widget.setCurrentWidget(self.focus_timer_page)
 
     def go_to_ml_page(self):
+        self.ml_page.start_camera()  # ← Explicitly start camera
         self.central_widget.setCurrentWidget(self.ml_page)
 
     def go_to_settings(self):
