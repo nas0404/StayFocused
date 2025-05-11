@@ -212,6 +212,17 @@ class MainMenu(QWidget):
         self.calibrate_btn = QPushButton("Calibrate")
         self.start_btn = QPushButton("Start Session")
         self.live_view_btn = QPushButton("Live View")
+        self.live_view_btn.setStyleSheet("""
+            QPushButton {
+                background-color: black;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+        """)
+        self.live_view_btn.setFont(QFont('Arial', 16))
+        self.live_view_btn.setFixedSize(180, 40) 
         self.settings_icon = QPushButton("⚙️")
 
         for btn in [self.calibrate_btn, self.start_btn]:
@@ -264,7 +275,7 @@ pose = mp_pose.Pose(
     min_tracking_confidence=0.5
 )
 
-class LiveViewPage(QWidget):
+class CameraView(QWidget):
     def __init__(self, return_home_callback):
         super().__init__()
         self.return_home_callback = return_home_callback
@@ -325,36 +336,28 @@ class LiveViewPage(QWidget):
 
 
 
-    def closeEvent(self, event):
+    def stop_camera(self):
         if self.cap and self.cap.isOpened():
             self.cap.release()
         if hasattr(self, 'timer'):
             self.timer.stop()
-        event.accept()
-
-
         
+    def close_Event(self, event):
+     self.stop_camera()
+     event.accept()
+class LiveViewPage(CameraView):
+    def __init__(self, return_home_callback):
+        super().__init__(return_home_callback)
+        self.add_back_button()
 
-        
-# class MLPage(LiveViewPage):
-#     def __init__(self, go_to_summary_callback, return_home_callback):
-#         self.go_to_summary_callback = go_to_summary_callback
-#         super().__init__(return_home_callback)  # Initializes camera and sets up layout
-#         self.initUI()
+    def add_back_button(self):
+        self.back_btn = QPushButton("Back to Home")
+        self.back_btn.setStyleSheet("background-color: black; color: white; padding: 12px 24px; border-radius: 10px;")
+        self.back_btn.setFont(QFont('Arial', 16))
+        self.back_btn.clicked.connect(self.return_home_callback)
+        self.layout().addWidget(self.back_btn, alignment=Qt.AlignCenter)
 
-#     def initUI(self):
-#         super().initUI()  # Ensure LiveViewPage UI (including self.title) is set up
-
-#         self.title.setText("You're now free to work")
-
-#         self.end_session_btn = QPushButton("End Session")
-#         self.end_session_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
-#         self.end_session_btn.setFont(QFont('Arial', 18))
-#         self.end_session_btn.clicked.connect(self.go_to_summary_callback)
-
-#         self.layout().addWidget(self.end_session_btn, alignment=Qt.AlignCenter)
-
-class MLPage(LiveViewPage):
+class MLPage(CameraView):
     def __init__(self, go_to_summary_callback, return_home_callback):
         self.go_to_summary_callback = go_to_summary_callback
         super().__init__(return_home_callback)  # Initializes layout
@@ -412,9 +415,11 @@ class FocusTimerPage(QWidget):
             self.go_to_next_page()
 
 
+
 class SummaryPage(QWidget):
-    def __init__(self):
+    def __init__(self,return_home_callback):
         super().__init__()
+        self.return_home_callback = return_home_callback
         self.initUI()
 
     def initUI(self):
@@ -440,6 +445,11 @@ class SummaryPage(QWidget):
         layout.addWidget(tab2)
         layout.addWidget(tab3)
         layout.addWidget(tab4)
+        self.back_btn = QPushButton("Back to Home")
+        self.back_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
+        self.back_btn.setFont(QFont('Arial', 18))
+        self.back_btn.clicked.connect(self.return_home_callback)
+        layout.addWidget(self.back_btn, alignment=Qt.AlignCenter)
         layout.addStretch()
 
         self.setLayout(layout)
@@ -456,7 +466,8 @@ class MainApp(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.settings_page = SettingsPage()
-        self.summary_page = SummaryPage()
+        # self.summary_page = SummaryPage()
+        self.summary_page = SummaryPage(self.return_to_home)
         self.max_distraction_time = self.settings_page.get_settings()['timeout']
         self.ml_page = MLPage(self.go_to_summary, self.return_to_home)
         self.focus_timer_page = FocusTimerPage(self.go_to_ml_page)
@@ -473,8 +484,11 @@ class MainApp(QMainWindow):
         self.central_widget.addWidget(self.summary_page)
 
     def go_to_live_view(self):
-        self.live_view_page.start_camera()  # <-- THIS starts the camera
+        self.ml_page.stop_camera()
+        self.live_view_page.stop_camera()
+        self.live_view_page.start_camera()
         self.central_widget.setCurrentWidget(self.live_view_page)
+
 
     def go_to_session(self):
         self.central_widget.setCurrentWidget(self.session_page)
@@ -497,7 +511,12 @@ class MainApp(QMainWindow):
     def go_to_summary(self):
         self.central_widget.setCurrentWidget(self.summary_page)
 
+    # def return_to_home(self):
+    #     self.central_widget.setCurrentWidget(self.main_menu)
+    
     def return_to_home(self):
+        self.live_view_page.stop_camera()
+        self.ml_page.stop_camera()
         self.central_widget.setCurrentWidget(self.main_menu)
 
 
