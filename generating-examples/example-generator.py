@@ -22,6 +22,10 @@ mp_drawing = mp.solutions.drawing_utils
  
 # Create folders if they don't exist
 os.makedirs('captured_frames', exist_ok=True)
+
+# Create subdirectories for ACTIVE and INACTIVE images
+os.makedirs('captured_frames/ACTIVE', exist_ok=True)
+os.makedirs('captured_frames/INACTIVE', exist_ok=True)
  
 # Open webcam
 cap = cv2.VideoCapture(0)
@@ -97,7 +101,7 @@ with open(logits_file, mode='a', newline='') as logits_f, open(coordinates_file,
                 # Save the plain frame (without landmarks) as an image
                 timestamp = int(time.time() * 1000)  # milliseconds
                 unique_id = f"{label.lower()}_{timestamp}"
-                image_filename = f"captured_frames/{unique_id}.jpg"
+                image_filename = f"captured_frames/{label}/{unique_id}.jpg"  # Save in respective folder
                 cv2.imwrite(image_filename, frame)  # Save the plain frame
                 print(f"Saved plain image: {image_filename}")
  
