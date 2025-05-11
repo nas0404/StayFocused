@@ -1,5 +1,3 @@
-
-
 import cv2
 import mediapipe as mp
 import csv
@@ -32,9 +30,22 @@ cap = cv2.VideoCapture(0)
 logits_file = 'logits.csv'
 coordinates_file = 'coordinates.csv'
 
-# Ensure headers are written for new files
-logits_header_written = False
-coordinates_header_written = False
+# Create new CSV files with headers if they don't exist
+if not os.path.exists(logits_file):
+    with open(logits_file, mode='w', newline='') as logits_f:
+        logits_writer = csv.writer(logits_f)
+        logits_header = ['unique_id'] + [f'logit{i}' for i in range(33)] + ['label']  # Assuming 33 landmarks
+        logits_writer.writerow(logits_header)
+
+if not os.path.exists(coordinates_file):
+    with open(coordinates_file, mode='w', newline='') as coords_f:
+        coords_writer = csv.writer(coords_f)
+        coordinates_header = ['unique_id'] + [f'coord{i}' for i in range(99)] + ['label']  # Assuming 33 landmarks * 3 (x, y, z)
+        coords_writer.writerow(coordinates_header)
+
+# Check if files are empty to determine if headers need to be written
+logits_header_written = os.path.getsize(logits_file) > 0
+coordinates_header_written = os.path.getsize(coordinates_file) > 0
  
 # Open CSV files for logits and coordinates
 with open(logits_file, mode='a', newline='') as logits_f, open(coordinates_file, mode='a', newline='') as coords_f:

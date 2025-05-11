@@ -1,0 +1,1 @@
+The logits and coordinates will add to the `.csv`s once you `Ctrl + C' out of the program in terminal.
