@@ -1,9 +1,20 @@
+
+
 import cv2
 import mediapipe as mp
 import csv
 import os
 import time
- 
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Change to the target directory relative to the script's location
+os.chdir(script_dir)
+
+# Verify the current working directory
+print("Current working directory:", os.getcwd())
+
 # Initialize Mediapipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
@@ -17,10 +28,6 @@ os.makedirs('captured_frames', exist_ok=True)
 # Open webcam
 cap = cv2.VideoCapture(0)
  
-# Create CSV file to store keypoints + labels
-output_file = 'posture_dataset_with_images.csv'
-header_written = False
-
 # Create separate CSV files for logits and coordinates
 logits_file = 'logits.csv'
 coordinates_file = 'coordinates.csv'
@@ -30,8 +37,7 @@ logits_header_written = False
 coordinates_header_written = False
  
 # Open CSV files for logits and coordinates
-with open(output_file, mode='a', newline='') as f, open(logits_file, mode='a', newline='') as logits_f, open(coordinates_file, mode='a', newline='') as coords_f:
-    csv_writer = csv.writer(f)
+with open(logits_file, mode='a', newline='') as logits_f, open(coordinates_file, mode='a', newline='') as coords_f:
     logits_writer = csv.writer(logits_f)
     coords_writer = csv.writer(coords_f)
  
@@ -109,25 +115,6 @@ with open(output_file, mode='a', newline='') as f, open(logits_file, mode='a', n
 
                 coords_writer.writerow(coordinates_row)
                 print(f"Appended coordinates to {coordinates_file} with label: {label}")
-
-                # Extract keypoints
-                row = [unique_id, image_filename]  # Start the row with unique ID and image filename
-                for lm in results.pose_landmarks.landmark:
-                    row.extend([lm.x, lm.y, lm.z, lm.visibility])
- 
-                row.append(label)
- 
-                if not header_written:
-                    header = ['unique_id', 'image_path']
-                    num_coords = len(results.pose_landmarks.landmark)
-                    for i in range(num_coords):
-                        header += [f'x{i}', f'y{i}', f'z{i}', f'v{i}']
-                    header.append('label')
-                    csv_writer.writerow(header)
-                    header_written = True
- 
-                csv_writer.writerow(row)
-                print(f"Captured frame and labelled it as: {label}")
  
 cap.release()
 cv2.destroyAllWindows()
