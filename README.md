@@ -2,5 +2,6 @@
 
 ## Setting up environment
 
-1. Download Anaconda
-2. Install the environment with `conda env create -f environment.yml`
+Run the following in your project folder after cloning the repository: 
+
+`conda env create -f environment.yml`
