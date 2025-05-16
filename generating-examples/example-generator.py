@@ -101,7 +101,7 @@ with open(logits_file, mode='a', newline='') as logits_f, open(coordinates_file,
                 # Save the plain frame (without landmarks) as an image
                 timestamp = int(time.time() * 1000)  # milliseconds
                 unique_id = f"{label.lower()}_{timestamp}"
-                image_filename = f"captured_frames/{label}/{unique_id}.jpg"  # Save in respective folder
+                image_filename = f"captured_frames/{label}/{unique_id}b.jpg"  # Save in respective folder
                 cv2.imwrite(image_filename, frame)  # Save the plain frame
                 print(f"Saved plain image: {image_filename}")
  
