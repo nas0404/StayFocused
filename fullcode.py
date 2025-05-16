@@ -125,9 +125,7 @@ class SettingsPage(QWidget):
         timer_layout.addLayout(button_layout)
         timer_frame.setLayout(timer_layout)
 
-        volume_label = QLabel("Set Audio Volume")
-        volume_label.setAlignment(Qt.AlignCenter)
-        volume_label.setFont(QFont('Arial', 20, QFont.Bold))
+
 
         self.volume_slider = QSlider(Qt.Horizontal)
         self.volume_slider.setMinimum(0)
@@ -168,7 +166,6 @@ class SettingsPage(QWidget):
         button_row.addStretch()
         
         layout.addSpacing(30)
-        layout.addWidget(volume_label)
         layout.addWidget(self.volume_slider, alignment=Qt.AlignCenter)
         layout.addSpacing(30)
         layout.addWidget(session_length_label)
@@ -357,12 +354,30 @@ class LiveViewPage(CameraView):
         self.back_btn.clicked.connect(self.return_home_callback)
         self.layout().addWidget(self.back_btn, alignment=Qt.AlignCenter)
 
+# class MLPage(CameraView):
+#     def __init__(self, go_to_summary_callback, return_home_callback):
+#         self.go_to_summary_callback = go_to_summary_callback
+#         super().__init__(return_home_callback)  # Initializes layout
+
+#         self.title.setText("You're now free to work")
+
+#         self.end_session_btn = QPushButton("End Session")
+#         self.end_session_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
+#         self.end_session_btn.setFont(QFont('Arial', 18))
+#         self.end_session_btn.clicked.connect(self.go_to_summary_callback)
+
+#         self.layout().addWidget(self.end_session_btn, alignment=Qt.AlignCenter)
+
 class MLPage(CameraView):
     def __init__(self, go_to_summary_callback, return_home_callback):
         self.go_to_summary_callback = go_to_summary_callback
         super().__init__(return_home_callback)  # Initializes layout
 
         self.title.setText("You're now free to work")
+
+        self.session_timer_label = QLabel("")
+        self.session_timer_label.setFont(QFont('Arial', 24))
+        self.layout().insertWidget(1, self.session_timer_label)  # Show timer under title
 
         self.end_session_btn = QPushButton("End Session")
         self.end_session_btn.setStyleSheet("background-color: black; color: white; padding: 15px 30px; border-radius: 10px;")
@@ -371,6 +386,26 @@ class MLPage(CameraView):
 
         self.layout().addWidget(self.end_session_btn, alignment=Qt.AlignCenter)
 
+        self.session_timer = QTimer()
+        self.session_timer.timeout.connect(self.update_session_timer)
+        self.session_seconds_left = 0
+
+    def start_session_timer(self, seconds):
+        self.session_seconds_left = seconds
+        self.update_session_timer()
+        self.session_timer.start(1000)
+
+    def update_session_timer(self):
+        mins = self.session_seconds_left // 60
+        secs = self.session_seconds_left % 60
+        self.session_timer_label.setText(f"Session Time Left: {mins:02d}:{secs:02d}")
+        if self.session_seconds_left <= 0:
+            self.session_timer.stop()
+            self.go_to_summary_callback()
+        else:
+            self.session_seconds_left -= 1
+    
+    
 
 
 class FocusTimerPage(QWidget):
@@ -494,15 +529,25 @@ class MainApp(QMainWindow):
         self.central_widget.setCurrentWidget(self.session_page)
 
     def go_to_focus_timer(self):
-        self.focus_timer_page.seconds = self.settings_page.get_settings()['timeout']
-        mins = self.focus_timer_page.seconds // 60
-        secs = self.focus_timer_page.seconds % 60
-        self.focus_timer_page.timer_display.setText(f"{mins:02d}:{secs:02d}")
+        # self.focus_timer_page.seconds = self.settings_page.get_settings()['timeout']
+        # mins = self.focus_timer_page.seconds // 60
+        # secs = self.focus_timer_page.seconds % 60
+        # self.focus_timer_page.timer_display.setText(f"{mins:02d}:{secs:02d}")
+        # self.focus_timer_page.timer.start(1000)
+        # self.central_widget.setCurrentWidget(self.focus_timer_page)
+        self.focus_timer_page.seconds = 5  # Always 10 seconds for pre-session countdown
+        self.focus_timer_page.timer_display.setText("00:05")
         self.focus_timer_page.timer.start(1000)
         self.central_widget.setCurrentWidget(self.focus_timer_page)
 
+    # def go_to_ml_page(self):
+    #     self.ml_page.start_camera()  # ← Explicitly start camera
+    #     self.central_widget.setCurrentWidget(self.ml_page)
     def go_to_ml_page(self):
-        self.ml_page.start_camera()  # ← Explicitly start camera
+        self.ml_page.start_camera()
+        session_length_min = self.settings_page.session_length_input.value()
+        session_length_sec = session_length_min * 60
+        self.ml_page.start_session_timer(session_length_sec)
         self.central_widget.setCurrentWidget(self.ml_page)
 
     def go_to_settings(self):
