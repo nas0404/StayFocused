@@ -1,0 +1,5 @@
+./generating-examples/captured_frames
+
+./generating-examples/coordinates.csv
+
+./generating-examples/logits.csv
