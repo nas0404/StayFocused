@@ -9,6 +9,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
+# class MPandSVM():
+#     def __init__(self):
+        
+
+
 class SessionPage(QWidget):
     def __init__(self, go_to_next_page):
         super().__init__()
