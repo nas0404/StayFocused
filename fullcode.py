@@ -270,6 +270,9 @@ class CameraView(QWidget):
         self.cap = None  # Initialize cap as None
         # Load your trained CNN model
         self.model = load_model("C:/Users/nasee/OneDrive/Documents/GitHub/Stay/vgg16dropout.keras")
+        self.model = load_model("C:/Users/nasee/OneDrive/Documents/GitHub/Stay/vgg16dropout.keras")
+        print("Model summary:")
+        self.model.summary()
 
 # Load face detector (Haar cascade)
         self.face_cascade = cv2.CascadeClassifier(
@@ -330,7 +333,9 @@ class CameraView(QWidget):
             face_input = np.expand_dims(face_normalized, axis=0)  # Shape (1, 224, 224, 3)
     
             # Predict expression
+            print("Face shape:", face.shape, "dtype:", face.dtype)
             prediction = self.model.predict(face_input)[0]
+            print("Prediction:", prediction)
             label = self.label_map[np.argmax(prediction)]
     
             # Draw bounding box and label

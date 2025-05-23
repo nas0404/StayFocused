@@ -3,3 +3,7 @@
 ./generating-examples/coordinates.csv
 
 ./generating-examples/logits.csv
+vgg16dropout.keras
+vgg16dropout.keras
+*.keras
+vgg16dropout.keras
