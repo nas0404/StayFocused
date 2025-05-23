@@ -306,49 +306,44 @@ class CameraView(QWidget):
             self.timer.timeout.connect(self.update_frame)
             self.timer.start(30)
  
-def update_frame(self):
-    ret, frame = self.cap.read()
-    if not ret:
-        self.video_label.setText("Camera error.")
-        return
- 
-    frame = cv2.flip(frame, 1)
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
- 
-    # Face detection
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
- 
-    for (x, y, w, h) in faces:
-        face = rgb_frame[y:y+h, x:x+w]
-        if face.size == 0:
-            continue
- 
-        # Preprocess face for CNN
-        face_resized = cv2.resize(face, (224, 224))
-        face_normalized = face_resized / 255.0
-        face_input = np.expand_dims(face_normalized, axis=0)  # Shape (1, 224, 224, 3)
- 
-        # Predict expression
-        prediction = self.model.predict(face_input)[0]
-        label = self.label_map[np.argmax(prediction)]
- 
-        # Draw bounding box and label
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                    1, (0, 255, 0), 2)
- 
-    # (Optional) Draw Mediapipe landmarks
-    results = pose.process(rgb_frame)
-    if results.pose_landmarks:
-        mp_drawing.draw_landmarks(
-            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
- 
-    # Convert for display
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image = QImage(frame.data, frame.shape[1], frame.shape[0],
-                   frame.strides[0], QImage.Format_RGB888)
-    self.video_label.setPixmap(QPixmap.fromImage(image))
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if not ret:
+            self.video_label.setText("Camera error.")
+            return
+    
+        frame = cv2.flip(frame, 1)
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+        # Face detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+    
+        for (x, y, w, h) in faces:
+            face = rgb_frame[y:y+h, x:x+w]
+            if face.size == 0:
+                continue
+    
+            # Preprocess face for CNN
+            face_resized = cv2.resize(face, (224, 224))
+            face_normalized = face_resized / 255.0
+            face_input = np.expand_dims(face_normalized, axis=0)  # Shape (1, 224, 224, 3)
+    
+            # Predict expression
+            prediction = self.model.predict(face_input)[0]
+            label = self.label_map[np.argmax(prediction)]
+    
+            # Draw bounding box and label
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 255, 0), 2)
+
+    
+        # Convert for display
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image = QImage(frame.data, frame.shape[1], frame.shape[0],
+                    frame.strides[0], QImage.Format_RGB888)
+        self.video_label.setPixmap(QPixmap.fromImage(image))
     # def update_frame(self):
     #     ret, frame = self.cap.read()
     #     if not ret:
