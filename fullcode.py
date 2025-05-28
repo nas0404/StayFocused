@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap, QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QTimer, QTime, QPropertyAnimation, QPoint
 from plyer import notification
 from win10toast_click import ToastNotifier
-from pygame import mixer
+import pygame
 import pyttsx3
 import sqlite3
 from datetime import datetime
@@ -25,12 +25,6 @@ class SessionPage(QWidget):
     def initUI(self):
         self.setStyleSheet("background-color: white;")
  
-        # self.circle_label = QLabel("Sit up\nstraight!")
-        # self.circle_label.setAlignment(Qt.AlignCenter)
-        # self.circle_label.setFont(QFont('Arial', 32))
-        # self.circle_label.setFixedSize(300, 300)
-        # self.circle_label.setStyleSheet("border: 4px solid black; border-radius: 150px; background-color: white; color: black; font-weight: bold;")
-
         self.circle_label = QLabel("Sit up\nstraight!")
         self.circle_label.setAlignment(Qt.AlignCenter)
         self.circle_label.setFont(QFont('Arial', 24, QFont.Bold))  # Smaller font size
@@ -43,7 +37,8 @@ class SessionPage(QWidget):
             color: black;
             font-weight: bold;
             padding: 24px;  /* Add padding for better fit */
-            """)
+        """)
+ 
         self.countdown_label = QLabel("5")
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.setFont(QFont('Segoe UI', 72, QFont.Bold))
@@ -531,8 +526,8 @@ class MainMenu(QWidget):
 
     def get_dynamic_greeting(self):
         hour = QTime.currentTime().hour()
-        user = os.getenv("USERNAME") or "friend"
-        # user = "naseem"
+        # user = os.getenv("USERNAME") or "friend"
+        user = "naseem"
         if hour < 12:
             
             return f"☀️ Good Morning, {user}"
@@ -649,7 +644,7 @@ class CameraView(QWidget):
             self.timer = QTimer()
             self.timer.timeout.connect(self.update_frame)
             # self.timer.start(30)
-            self.timer.start(16)
+            self.timer.start(1000)
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -802,7 +797,7 @@ class MLPage(CameraView):
 
         # Load face detector and emotion model
         self.face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        self.emotion_model = load_model("C:/Users/nextg/Downloads/vgg16dropout.keras")
+        self.emotion_model = load_model('./mobilenetv2.keras')
         self.emotion_labels = ['Active', 'Inactive']
 
     # def start_session_timer(self, seconds):
@@ -811,7 +806,7 @@ class MLPage(CameraView):
     #     self.session_timer.start(1000)
     def start_session_timer(self, seconds, planned_session_length):
         self.session_seconds_left = seconds
-        self.planned_session_length = planned_session_length  # ✅ Store it for later
+        self.planned_session_length = planned_session_length  
         self.update_session_timer()
         self.session_timer.start(1000)
 
@@ -878,10 +873,10 @@ class MLPage(CameraView):
                     self.voice_engine.say("Come on, you got this, get your head in the game!")
                     self.voice_engine.runAndWait()
                 elif self.selected_sound == 'ding':
-                    mixer.init()
-                    mixer.music.load("./dingsound.mp3")  # or "ding.wav"
-                    mixer.music.set_volume(0.6)
-                    mixer.music.play()
+                    pygame.mixer.init()
+                    pygame.mixer.music.load("./dingsound.mp3")  # or "ding.wav"
+                    pygame.mixer.music.set_volume(0.6)
+                    pygame.mixer.music.play()
 
 
         elif predicted_label == 'Active':
