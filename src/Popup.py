@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QFont, QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
-from plyer import notification
 from win10toast_click import ToastNotifier
 
 

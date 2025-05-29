@@ -26,9 +26,7 @@ class MainApp(QMainWindow):
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
  
-        self.settings_page = SettingsPage()
-        self.max_distraction_time = self.settings_page.get_settings()['timeout']
-        
+        self.settings_page = SettingsPage()        
         self.session_page = SessionPage(self.go_to_ml_page)
         self.live_view_page = LiveViewPage(self.return_to_home)
         self.main_menu = MainMenu(self.go_to_live_view, self.go_to_session, self.go_to_settings, self.go_to_history)

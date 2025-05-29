@@ -47,6 +47,14 @@ class SessionDatabase:
         notes, interrupted, completion_rate
          ))
         self.conn.commit()
+        
+    def update_last_session_notes(self, notes):
+        self.cursor.execute("""
+            UPDATE sessions
+            SET notes = ?
+            WHERE id = (SELECT MAX(id) FROM sessions)
+        """, (notes,))
+        self.conn.commit()
     
 
     def close(self):

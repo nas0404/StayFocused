@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap, QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QTimer, QTime, QPropertyAnimation, QPoint
-from plyer import notification
 from win10toast_click import ToastNotifier
 class SettingsPage(QWidget):
     def __init__(self):
@@ -122,66 +121,6 @@ class SettingsPage(QWidget):
         """)
         layout.addWidget(self.countdown_input, alignment=Qt.AlignLeft)
         
-        reminder_label = QLabel("Set Reminder (minutes : seconds)")
-        reminder_label.setFont(QFont('Segoe UI', 18))
-        reminder_label.setStyleSheet("color: #cccccc; background: transparent;")
-        layout.addWidget(reminder_label)
-        
-        reminder_label.setStyleSheet("""
-            color: #cccccc;
-            background: none;
-            border: none;
-        """)
-
-        time_input_layout = QHBoxLayout()
-        self.minute_input = QSpinBox()
-        self.minute_input.setRange(0, 59)
-        self.minute_input.setFont(QFont('Segoe UI', 18))
-        self.minute_input.setFixedWidth(100)
-        self.minute_input.setStyleSheet("""
-            QSpinBox {
-                background-color: white;
-                color: black;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                padding: 4px 6px;
-            }
-        """)
-
-
-        self.second_input = QSpinBox()
-        self.second_input.setRange(0, 59)
-        self.second_input.setFont(QFont('Segoe UI', 18))
-        self.second_input.setFixedWidth(100)
-        self.second_input.setStyleSheet("""
-            QSpinBox {
-                background-color: white;
-                color: black;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                padding: 4px 6px;
-            }
-        """)
-
-        colon = QLabel(":")
-        colon.setFont(QFont('Segoe UI', 24))
-        colon.setAlignment(Qt.AlignCenter)
-        colon.setStyleSheet("""
-            QLabel {
-                background-color: transparent;
-                color: #cccccc;
-            }
-        """)
-        colon.setFixedWidth(10)
-        
-       
-
-
-        time_input_layout.addWidget(self.minute_input)
-        time_input_layout.addWidget(colon)
-        time_input_layout.addWidget(self.second_input)
-        layout.addLayout(time_input_layout, stretch=0)
-        layout.setAlignment(time_input_layout, Qt.AlignCenter)
         
         distraction_label = QLabel("Distraction Tolerance (seconds)")
         distraction_label.setFont(QFont('Segoe UI', 18))
@@ -271,13 +210,10 @@ class SettingsPage(QWidget):
         self.parent().parent().return_to_home()
  
     def confirm_settings(self):
-        total_seconds = self.minute_input.value() * 60 + self.second_input.value()
-        self.parent().parent().max_distraction_time = total_seconds
         self.return_home()
  
     def get_settings(self):
         return {
-            'timeout': self.minute_input.value() * 60 + self.second_input.value(),
             'session_length': self.session_length_input.value(),
             'pre_session_countdown': self.countdown_input.value(),
             'distraction_tolerance': self.distraction_input.value(),

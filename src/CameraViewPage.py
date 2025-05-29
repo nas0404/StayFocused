@@ -10,7 +10,7 @@ import pygame
 import pyttsx3
 from tensorflow.keras.models import load_model
 
-from src.Notifications import Notification
+from src.Popup import Notification
 
 class CameraView(QWidget):
     def __init__(self, return_home_callback):
@@ -193,7 +193,7 @@ class MLPage(CameraView):
         self.session_timer.timeout.connect(self.update_session_timer)
         self.session_seconds_left = 0
 
-        self.emotion_model = load_model('./mobilenetv2.keras')
+        self.emotion_model = load_model('./alexnet.keras')
         self.emotion_labels = ['Active', 'Inactive']
 
 
