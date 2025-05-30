@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import (
     QWidget, QPushButton, QLabel, QVBoxLayout,
-    QHBoxLayout, QSpinBox, QGraphicsDropShadowEffect
+    QHBoxLayout, QSpinBox, QGraphicsDropShadowEffect,
+    QRadioButton, QButtonGroup
 )
-from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap, QColor, QPainter, QBrush
-from PyQt5.QtCore import Qt, QTimer, QTime, QPropertyAnimation, QPoint
-from win10toast_click import ToastNotifier
+from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtCore import Qt
 class SettingsPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -142,8 +142,6 @@ class SettingsPage(QWidget):
             }
         """)
         layout.addWidget(self.distraction_input, alignment=Qt.AlignLeft)
-
-        from PyQt5.QtWidgets import QRadioButton, QButtonGroup
 
         self.sound_group = QButtonGroup(self)
         self.ding_radio = QRadioButton("🔔 Classic Ding")

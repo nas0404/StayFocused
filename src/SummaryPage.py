@@ -62,7 +62,6 @@ class SummaryPage(QWidget):
         layout.addWidget(self.distractions_label)
         layout.addWidget(self.completion_label)
 
-        # NEW: Notes input field
         self.notes_input = QTextEdit()
         self.notes_input.setPlaceholderText("Optional: Reflect on your session or write notes...")
         self.notes_input.setStyleSheet("background-color: white; color: black; padding: 12px; border-radius: 10px;")
@@ -70,7 +69,6 @@ class SummaryPage(QWidget):
         self.notes_input.setMinimumHeight(120)
         layout.addWidget(self.notes_input)
 
-        # NEW: Save Notes button
         save_btn = QPushButton("💾 Save Notes")
         save_btn.setFont(QFont("Segoe UI Semibold", 14))
         save_btn.setCursor(Qt.PointingHandCursor)
@@ -92,7 +90,6 @@ class SummaryPage(QWidget):
         save_btn.clicked.connect(self.save_notes)
         layout.addWidget(save_btn, alignment=Qt.AlignCenter)
 
-        # Back to Home button
         back_btn = QPushButton("⬅️ Back to Home")
         back_btn.setFont(QFont("Segoe UI Semibold", 14))
         back_btn.setCursor(Qt.PointingHandCursor)

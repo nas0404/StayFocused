@@ -73,21 +73,19 @@ class SessionHistoryPage(QWidget):
             timestamp, planned, actual, focus, distraction, distractions, audio_type, interrupted, completion, note = row
 
             values = [
-                timestamp.split("T")[0] + " " + timestamp.split("T")[1].split(".")[0],  # formatted date
+                timestamp.split("T")[0] + " " + timestamp.split("T")[1].split(".")[0],
                 planned, actual, focus, distraction, distractions,
                 audio_type, "Yes" if interrupted else "No", f"{completion:.1f}%"
             ]
 
-            # Format time columns
             for col_idx, val in enumerate(values):
-                if col_idx in [1, 2, 3, 4]:  # Time columns
+                if col_idx in [1, 2, 3, 4]: 
                     total_seconds = int(float(val)) if val is not None else 0
                     minutes = total_seconds // 60
                     seconds = total_seconds % 60
                     val = f"{minutes:02d}:{seconds:02d}"
                 self.table.setItem(row_idx, col_idx, QTableWidgetItem(str(val)))
 
-            # Add "View" button for the note
             view_btn = QPushButton("View")
             view_btn.setStyleSheet("""
                 QPushButton {

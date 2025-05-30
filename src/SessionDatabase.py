@@ -8,10 +8,6 @@ class SessionDatabase:
         self.setup_database()
 
     def setup_database(self):
-#         self.cursor.execute("""
-#     DROP TABLE IF EXISTS sessions
-# """)
-
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
